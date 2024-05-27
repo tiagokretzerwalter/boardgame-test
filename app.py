@@ -133,6 +133,14 @@ def move_to_deck2(data):
     players[player_id]['deck2'].append(card)
     emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
+@socketio.on('send_to_deck1')
+def send_to_deck1(data):
+    player_id = f'Player {data["player_id"]}'
+    card = data['card']
+    players[player_id]['board'].remove(card)
+    deck1.append(card)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+
 
 
 if __name__ == '__main__':

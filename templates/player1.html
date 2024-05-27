@@ -89,7 +89,9 @@
                     var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
                     var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">Move to Deck 1</button>`;
                     var moveButtonToDeck2 = `<button class="move-to-deck2" data-card="${card}">Move to Deck 2</button>`;
-                    $('#board').append(cardElement + trashButton, moveButtonToDeck1, moveButtonToDeck2); // Append card, trash button, move to deck 1 and move to deck 2
+                    var sendButtons = generateSendButtons(card, "board");
+                    var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">Send to Deck 1</button>`;
+                    $('#board').append(cardElement + trashButton, moveButtonToDeck1, moveButtonToDeck2, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1, move to deck 2 and sendButtons
                 });
 
                 $('#other_players_boards').empty();
@@ -140,12 +142,24 @@
                 socket.emit('move_to_deck2', { player_id: player_id, card: card });
             });
 
+            $(document).on('click', '.send_to_deck1', function() {
+                var card = $(this).data('card');
+                socket.emit('send_to_deck1', { player_id: player_id, card: card });
+            });
+
             function generateSendButtons(card, deckNumber) {
                 var sendButtons = '';
                 for (var i = 1; i <= 6; i++) {
-                    if (i !== player_id) {
-                        sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">Send to Player ${i}</button>`;
+                    if (deckNumber == "board") {
+                        if (i !== player_id) {
+                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">Send to Player ${i}</button>`;
+                        }
                     }
+                    else {
+                        if (i !== player_id) {
+                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">Send to Player ${i}</button>`;
+                        }
+                    }                    
                 }
                 return sendButtons;
             }
