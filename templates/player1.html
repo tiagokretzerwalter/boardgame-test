@@ -27,6 +27,12 @@
     <h1>Player 1</h1>
     <button id="draw_deck1">Draw from Deck 1</button>
     <button id="draw_deck2">Draw from Deck 2</button>
+    <button id="draw_character">Draw from Character's Deck</button>
+
+    <div class="board">
+        <h2>Your character</h2>
+        <div id="character" class="deck"></div>
+    </div>
 
     <div class="board">
         <h2>Your Deck from Deck 1</h2>
@@ -66,8 +72,17 @@
                 socket.emit('draw_card', { player_id: player_id, deck: 'deck2' });
             });
 
+            $('#draw_character').click(function() {
+                socket.emit('draw_card', { player_id: player_id, deck: 'character' });
+            });
+
             socket.on('update', function(data) {
                 var playerData = data.players['Player ' + player_id];
+                $('#character').empty();
+                playerData.character.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    $('#character').append(cardElement);
+                });
                 $('#deck1').empty();
                 playerData.deck1.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;

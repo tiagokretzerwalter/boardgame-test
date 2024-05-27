@@ -8,10 +8,12 @@ socketio = SocketIO(app)
 
 original_deck1 = ["Card1", "Card2", "Card3", "Card4", "Card5", "Card6"]
 original_deck2 = ["Card7", "Card8", "Card9", "Card10"]
+original_characters_deck = ["Gorda", "Trabalhadora", "Ninja", "Amiga", "Blogueira", "Envergonhada"]
+characters_deck = original_characters_deck.copy()
 deck1 = original_deck1.copy()
 deck2 = original_deck2.copy()
 trash_deck = []
-players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': []} for i in range(1, 7)}
+players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': [], 'character': []} for i in range(1, 7)}
 
 @app.route('/')
 def index():
@@ -27,11 +29,11 @@ def trash():
 
 @socketio.on('connect')
 def handle_connect():
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('draw_card')
 def draw_card(data):
@@ -43,7 +45,10 @@ def draw_card(data):
     elif deck_name == 'deck2' and deck2:
         card = deck2.pop()
         players[player_id]['deck2'].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    elif deck_name == 'character' and characters_deck:
+        card = characters_deck.pop()
+        players[player_id]['character'].append(card)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('shuffle_deck')
 def shuffle_deck(data):
@@ -52,7 +57,9 @@ def shuffle_deck(data):
         random.shuffle(deck1)
     elif deck_name == 'deck2':
         random.shuffle(deck2)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    elif deck_name == "characters_deck":
+        random.shuffle(characters_deck)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('shuffle_player_deck')
 def shuffle_player_deck(data):
@@ -62,7 +69,7 @@ def shuffle_player_deck(data):
         random.shuffle(players[player_id]['deck1'])
     elif deck_name == 'deck2':
         random.shuffle(players[player_id]['deck2'])
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('reset_game')
 def reset_game():
@@ -71,7 +78,7 @@ def reset_game():
     deck2 = original_deck2.copy()
     trash_deck = []
     players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': []} for i in range(1, 7)}
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('use_card')
 def use_card(data):
@@ -82,7 +89,7 @@ def use_card(data):
     elif card in players[player_id]['deck2']:
         players[player_id]['deck2'].remove(card)
     players[player_id]['board'].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('send_card')
 def send_card(data):
@@ -93,7 +100,7 @@ def send_card(data):
     if card in players[player_id][target_deck]:
         players[player_id][target_deck].remove(card)
         players[target_player][target_deck].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('send_card_to_trash')
 def send_card_to_trash(data):
@@ -106,7 +113,7 @@ def send_card_to_trash(data):
     elif card in players[player_id]['board']:
         players[player_id]['board'].remove(card)
     trash_deck.append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('send_card_from_trash')
 def send_card_from_trash(data):
@@ -115,7 +122,7 @@ def send_card_from_trash(data):
     target_deck = data['target_deck']
     trash_deck.remove(card)
     players[target_player][target_deck].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('move_to_deck1')
 def move_to_deck1(data):
@@ -123,7 +130,7 @@ def move_to_deck1(data):
     card = data['card']
     players[player_id]['board'].remove(card)
     players[player_id]['deck1'].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('move_to_deck2')
 def move_to_deck2(data):
@@ -131,7 +138,7 @@ def move_to_deck2(data):
     card = data['card']
     players[player_id]['board'].remove(card)
     players[player_id]['deck2'].append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('send_to_deck1')
 def send_to_deck1(data):
@@ -139,7 +146,7 @@ def send_to_deck1(data):
     card = data['card']
     players[player_id]['board'].remove(card)
     deck1.append(card)
-    emit('update', {'deck1': deck1, 'deck2': deck2, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 
 
