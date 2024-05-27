@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player 5</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        .board {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .other-player-board {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .deck {
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Player 5</h1>
+    <button id="draw_deck1">Draw from Deck 1</button>
+    <button id="draw_deck2">Draw from Deck 2</button>
+
+    <div class="board">
+        <h2>Your Deck from Deck 1</h2>
+        <div id="deck1" class="deck"></div>
+    </div>
+
+    <div class="board">
+        <h2>Your Deck from Deck 2</h2>
+        <div id="deck2" class="deck"></div>
+    </div>
+
+    <div class="board">
+        <h2>Your Board</h2>
+        <div id="board"></div>
+    </div>
+
+    <div class="other-player-board">
+        <h2>Other Players' Boards</h2>
+        <div id="other_players_boards"></div>
+    </div>
+
+    <!-- Button to go to the trash page -->
+    <button onclick="window.location.href='/trash'">View Trash</button>
+
+    <script>
+        $(document).ready(function() {
+            var socket = io();
+            var player_id = 5;
+
+            $('#draw_deck1').click(function() {
+                socket.emit('draw_card', { player_id: player_id, deck: 'deck1' });
+            });
+
+            $('#draw_deck2').click(function() {
+                socket.emit('draw_card', { player_id: player_id, deck: 'deck2' });
+            });
+
+            socket.on('update', function(data) {
+                var playerData = data.players['Player ' + player_id];
+                $('#deck1').empty();
+                playerData.deck1.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    var useButton = `<button class="use-deck1-card" data-card="${card}">Use</button>`;
+                    var sendButtons = generateSendButtons(card, 1);
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
+                    $('#deck1').append(cardElement + useButton + sendButtons + trashButton); // Append card, use button, send buttons, and trash button
+                });
+                $('#deck2').empty();
+                playerData.deck2.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    var sendButtons = generateSendButtons(card, 2);
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
+                    $('#deck2').append(cardElement + sendButtons + trashButton); // Append card, send buttons, and trash button
+                });
+                $('#board').empty();
+                playerData.board.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
+                    $('#board').append(cardElement + trashButton); // Append card and trash button
+                });
+
+                $('#other_players_boards').empty();
+                Object.keys(data.players).forEach(function(player) {
+                    if (player !== 'Player ' + player_id) {
+                        $('#other_players_boards').append(`<div class="other-player-board">`);
+                        $('#other_players_boards').append(`<h3>${player}'s Board</h3>`);
+                        data.players[player].board.forEach(function(card) {
+                            $('#other_players_boards').append(`<div>${card}</div>`);
+                        });
+                        $('#other_players_boards').append(`</div>`);
+                    }
+                });
+            });
+
+            $(document).on('click', '.use-deck1-card', function() {
+                var card = $(this).data('card');
+                socket.emit('use_card', { player_id: player_id, card: card });
+            });
+
+            $(document).on('click', '.send-card', function() {
+                var card = $(this).data('card');
+                var targetPlayer = $(this).data('target-player');
+                var targetDeck = $(this).data('target-deck');
+                socket.emit('send_card', { player_id: player_id, card: card, target_player: targetPlayer, target_deck: targetDeck });
+            });
+
+            $(document).on('click', '.send-to-trash', function() {
+                var card = $(this).data('card');
+                socket.emit('send_card_to_trash', { player_id: player_id, card: card });
+            });
+
+            function generateSendButtons(card, deckNumber) {
+                var sendButtons = '';
+                for (var i = 1; i <= 6; i++) {
+                    if (i !== player_id) {
+                        sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">Send to Player ${i}</button>`;
+                    }
+                }
+                return sendButtons;
+            }
+        });
+    </script>
+</body>
+</html>

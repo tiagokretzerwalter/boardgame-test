@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <title>Trash Deck</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        .trash-deck {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trash Deck</h1>
+
+    <div class="trash-deck">
+        <h2>Trash Deck</h2>
+        <div id="trash_deck"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var socket = io();
+            
+            socket.on('update', function(data) {
+                $('#trash_deck').empty();
+                data.trash_deck.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    var sendButtons = generateSendButtons(card);
+                    $('#trash_deck').append(cardElement + sendButtons);
+                });
+            });
+
+            $(document).on('click', '.send-from-trash', function() {
+                var card = $(this).data('card');
+                var targetPlayer = $(this).data('target-player');
+                var targetDeck = $(this).data('target-deck');
+                socket.emit('send_card_from_trash', { target_player: targetPlayer, card: card, target_deck: targetDeck });
+            });
+
+            function generateSendButtons(card) {
+                var sendButtons = '';
+                for (var i = 1; i <= 6; i++) {
+                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck1">Send to Player ${i} Deck 1</button>`;
+                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck2">Send to Player ${i} Deck 2</button>`;
+                }
+                return sendButtons;
+            }
+        });
+    </script>
+</body>
+</html>
