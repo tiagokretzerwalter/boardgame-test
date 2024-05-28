@@ -19,6 +19,12 @@
         <h2>Trash Deck</h2>
         <div id="trash_deck"></div>
     </div>
+    <div></div>
+    <ul>
+        {% for i in range(1, 7) %}
+            <li><a href="/player/{{ i }}">Player {{ i }}</a></li>
+        {% endfor %}
+    </ul>
 
     <script>
         $(document).ready(function() {

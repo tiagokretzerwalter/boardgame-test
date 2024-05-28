@@ -27,14 +27,22 @@
     <h1>Player 2</h1>
     <button id="draw_deck1">Draw from Deck 1</button>
     <button id="draw_deck2">Draw from Deck 2</button>
+    <button id="draw_character">Draw from Character's Deck</button>
+
+    <div class="board">
+        <h2>Your character</h2>
+        <div id="character" class="deck"></div>
+    </div>
 
     <div class="board">
         <h2>Your Deck from Deck 1</h2>
+        <button id="shuffle_player_deck1">Shuffle Deck 1</button>
         <div id="deck1" class="deck"></div>
     </div>
 
     <div class="board">
         <h2>Your Deck from Deck 2</h2>
+        <button id="shuffle_player_deck2">Shuffle Deck 2</button>
         <div id="deck2" class="deck"></div>
     </div>
 
@@ -64,8 +72,17 @@
                 socket.emit('draw_card', { player_id: player_id, deck: 'deck2' });
             });
 
+            $('#draw_character').click(function() {
+                socket.emit('draw_card', { player_id: player_id, deck: 'character' });
+            });
+
             socket.on('update', function(data) {
                 var playerData = data.players['Player ' + player_id];
+                $('#character').empty();
+                playerData.character.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    $('#character').append(cardElement);
+                });
                 $('#deck1').empty();
                 playerData.deck1.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
@@ -85,7 +102,11 @@
                 playerData.board.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
                     var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
-                    $('#board').append(cardElement + trashButton); // Append card and trash button
+                    var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">Move to Deck 1</button>`;
+                    var moveButtonToDeck2 = `<button class="move-to-deck2" data-card="${card}">Move to Deck 2</button>`;
+                    var sendButtons = generateSendButtons(card, "board");
+                    var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">Send to Deck 1</button>`;
+                    $('#board').append(cardElement + trashButton, moveButtonToDeck1, moveButtonToDeck2, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1, move to deck 2 and sendButtons
                 });
 
                 $('#other_players_boards').empty();
@@ -99,6 +120,14 @@
                         $('#other_players_boards').append(`</div>`);
                     }
                 });
+            });
+
+            $('#shuffle_player_deck1').click(function() {
+                socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'deck1' });
+            });
+
+            $('#shuffle_player_deck2').click(function() {
+                socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'deck2' });
             });
 
             $(document).on('click', '.use-deck1-card', function() {
@@ -118,12 +147,34 @@
                 socket.emit('send_card_to_trash', { player_id: player_id, card: card });
             });
 
+            $(document).on('click', '.move-to-deck1', function() {
+                var card = $(this).data('card');
+                socket.emit('move_to_deck1', { player_id: player_id, card: card });
+            });
+
+            $(document).on('click', '.move-to-deck2', function() {
+                var card = $(this).data('card');
+                socket.emit('move_to_deck2', { player_id: player_id, card: card });
+            });
+
+            $(document).on('click', '.send_to_deck1', function() {
+                var card = $(this).data('card');
+                socket.emit('send_to_deck1', { player_id: player_id, card: card });
+            });
+
             function generateSendButtons(card, deckNumber) {
                 var sendButtons = '';
                 for (var i = 1; i <= 6; i++) {
-                    if (i !== player_id) {
-                        sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">Send to Player ${i}</button>`;
+                    if (deckNumber == "board") {
+                        if (i !== player_id) {
+                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">Send to Player ${i}</button>`;
+                        }
                     }
+                    else {
+                        if (i !== player_id) {
+                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">Send to Player ${i}</button>`;
+                        }
+                    }                    
                 }
                 return sendButtons;
             }

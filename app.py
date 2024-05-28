@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 import random
 from dotenv import load_dotenv
+import csv
 
 
 load_dotenv()
@@ -11,14 +12,30 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret_key')
 socketio = SocketIO(app)
 
-original_deck1 = ["Card1", "Card2", "Card3", "Card4", "Card5", "Card6"]
-original_deck2 = ["Card7", "Card8", "Card9", "Card10"]
+utopia_csv_file_path = 'data/utopia_cards.csv'
+acao_csv_file_path = 'data/acao_cards.csv'
+
+original_deck1 = []
+original_deck2 = []
+
+with open(utopia_csv_file_path, 'r', encoding='utf-8') as file:
+    csv_reader = csv.DictReader(file)
+    for row in csv_reader:
+        original_deck1.append(row['Utopia'])
+
+with open(acao_csv_file_path, 'r', encoding='utf-8') as file:
+    csv_reader = csv.DictReader(file)
+    for row in csv_reader:
+        original_deck2.append(row['Ação'])
+
 original_characters_deck = ["Gorda", "Trabalhadora", "Ninja", "Amiga", "Blogueira", "Envergonhada"]
 characters_deck = original_characters_deck.copy()
 deck1 = original_deck1.copy()
 deck2 = original_deck2.copy()
 trash_deck = []
 players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': [], 'character': []} for i in range(1, 7)}
+
+
 
 @app.route('/')
 def index():
@@ -81,8 +98,9 @@ def reset_game():
     global deck1, deck2, trash_deck, players
     deck1 = original_deck1.copy()
     deck2 = original_deck2.copy()
+    characters_deck = original_characters_deck.copy()
     trash_deck = []
-    players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': []} for i in range(1, 7)}
+    players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': [], 'character': []} for i in range(1, 7)}
     emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'trash_deck': trash_deck, 'players': players}, broadcast=True)
 
 @socketio.on('use_card')
