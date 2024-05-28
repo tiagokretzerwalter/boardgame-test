@@ -49,8 +49,8 @@
             function generateSendButtons(card) {
                 var sendButtons = '';
                 for (var i = 1; i <= 6; i++) {
-                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck1">Send to Player ${i} Deck 1</button>`;
-                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck2">Send to Player ${i} Deck 2</button>`;
+                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck1">--> Player ${i} Utopia</button>`;
+                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck2">--> Player ${i} Ação</button>`;
                 }
                 return sendButtons;
             }

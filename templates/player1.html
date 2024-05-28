@@ -97,26 +97,26 @@
                 $('#deck1').empty();
                 playerData.deck1.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
-                    var useButton = `<button class="use-deck1-card" data-card="${card}">Use</button>`;
+                    var useButton = `<button class="use-deck1-card" data-card="${card}">Aplicar</button>`;
                     var sendButtons = generateSendButtons(card, 1);
-                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
                     $('#deck1').append(cardElement + useButton + sendButtons + trashButton); // Append card, use button, send buttons, and trash button
                 });
                 $('#deck2').empty();
                 playerData.deck2.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
                     var sendButtons = generateSendButtons(card, 2);
-                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
                     $('#deck2').append(cardElement + sendButtons + trashButton); // Append card, send buttons, and trash button
                 });
                 $('#board').empty();
                 playerData.board.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
-                    var trashButton = `<button class="send-to-trash" data-card="${card}">Trash</button>`;
-                    var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">Move to Deck 1</button>`;
-                    var moveButtonToDeck2 = `<button class="move-to-deck2" data-card="${card}">Move to Deck 2</button>`;
+                    var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
+                    var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">--> Mão Utopia</button>`;
+                    var moveButtonToDeck2 = `<button class="move-to-deck2" data-card="${card}">ERRO</button>`;
                     var sendButtons = generateSendButtons(card, "board");
-                    var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">Send to Deck 1</button>`;
+                    var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">--> Monte Utopia</button>`;
                     $('#board').append(cardElement + trashButton, moveButtonToDeck1, moveButtonToDeck2, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1, move to deck 2 and sendButtons
                 });
 
@@ -178,7 +178,7 @@
                 for (var i = 1; i <= 6; i++) {
                     if (deckNumber == "board") {
                         if (i !== player_id) {
-                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">Send to Player ${i}</button>`;
+                            sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
                         }
                     }
                     else {
