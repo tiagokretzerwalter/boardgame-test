@@ -16,11 +16,13 @@
     <h1>Trash Deck</h1>
 
     <div class="trash-deck">
+        <button id="reset_utopia_trash_deck">Resetar o lixo de Utopia</button>
         <h2>Utopia Trash Deck</h2>
         <div id="utopia_trash_deck"></div>
     </div>
     <div class="trash-deck">
-        <h2>Utopia Trash Deck</h2>
+        <button id="reset_acao_trash_deck">Resetar o lixo de ação</button>
+        <h2>Ação Trash Deck</h2>
         <div id="acao_trash_deck"></div>
     </div>
     <div></div>
@@ -33,6 +35,14 @@
     <script>
         $(document).ready(function() {
             var socket = io();
+
+            $('#reset_utopia_trash_deck').click(function() {
+                socket.emit('reset_trash', { deck: 'utopia_trash_deck' });
+            });
+
+            $('#reset_acao_trash_deck').click(function() {
+                socket.emit('reset_trash', { deck: 'acao_trash_deck' });
+            });
             
             socket.on('update', function(data) {
                 $('#utopia_trash_deck').empty();

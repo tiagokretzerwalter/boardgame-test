@@ -170,6 +170,17 @@ def send_to_deck1(data):
     deck1.append(card)
     emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players}, broadcast=True)
 
+@socketio.on('reset_trash')
+def reset_trash(data):
+    global utopia_trash_deck, acao_trash_deck
+    deck_name = data['deck']
+    if deck_name == 'utopia_trash_deck':
+        deck1.extend(utopia_trash_deck)
+        utopia_trash_deck = []
+    if deck_name == 'acao_trash_deck':
+        deck2.extend(acao_trash_deck)
+        acao_trash_deck = []    
+    emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players}, broadcast=True)
 
 
 if __name__ == '__main__':
