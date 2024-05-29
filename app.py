@@ -44,7 +44,7 @@ def index():
 
 @app.route('/player/<int:player_id>')
 def player(player_id):
-    return render_template(f'player{player_id}.html', player_id=player_id)
+    return render_template('player.html', player_id=player_id)
 
 @app.route('/trash')
 def trash():
