@@ -1,79 +1,26 @@
-<!doctype html>
-<html>
-<head>
-    <title>Trash Deck</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <style>
-        .trash-deck {
-            border: 1px solid black;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Trash Deck</h1>
+{% extends "base.html" %}
 
+{% block title %}Trash Deck{% endblock %}
+
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/trash.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Trash Deck</h2>
     <div class="trash-deck">
-        <button id="reset_utopia_trash_deck">Resetar o lixo de Utopia</button>
-        <h2>Utopia Trash Deck</h2>
+        <button id="reset_utopia_trash_deck">Reset Utopia Trash Deck</button>
+        <h3>Utopia Trash Deck</h3>
         <div id="utopia_trash_deck"></div>
     </div>
     <div class="trash-deck">
-        <button id="reset_acao_trash_deck">Resetar o lixo de ação</button>
-        <h2>Ação Trash Deck</h2>
+        <button id="reset_acao_trash_deck">Reset Ação Trash Deck</button>
+        <h3>Ação Trash Deck</h3>
         <div id="acao_trash_deck"></div>
     </div>
-    <div></div>
-    <ul>
-        {% for i in range(1, 7) %}
-            <li><a href="/player/{{ i }}">Player {{ i }}</a></li>
-        {% endfor %}
-    </ul>
+{% endblock %}
 
-    <script>
-        $(document).ready(function() {
-            var socket = io();
-
-            $('#reset_utopia_trash_deck').click(function() {
-                socket.emit('reset_trash', { deck: 'utopia_trash_deck' });
-            });
-
-            $('#reset_acao_trash_deck').click(function() {
-                socket.emit('reset_trash', { deck: 'acao_trash_deck' });
-            });
-            
-            socket.on('update', function(data) {
-                $('#utopia_trash_deck').empty();
-                data.utopia_trash_deck.forEach(function(card) {
-                    var cardElement = `<div>${card}</div>`;
-                    var sendButtons = generateSendButtons(card);
-                    $('#utopia_trash_deck').append(cardElement + sendButtons);
-                });
-                $('#acao_trash_deck').empty();
-                data.acao_trash_deck.forEach(function(card) {
-                    var cardElement = `<div>${card}</div>`;
-                    var sendButtons = generateSendButtons(card);
-                    $('#acao_trash_deck').append(cardElement + sendButtons);
-                });
-            });
-
-            $(document).on('click', '.send-from-trash', function() {
-                var card = $(this).data('card');
-                var targetPlayer = $(this).data('target-player');
-                socket.emit('send_card_from_trash', { target_player: targetPlayer, card: card });
-            });
-
-            function generateSendButtons(card) {
-                var sendButtons = '';
-                for (var i = 1; i <= 6; i++) {
-                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" >--> Player ${i}</button>`;
-                    
-                }
-                return sendButtons;
-            }
-        });
-    </script>
-</body>
-</html>
+{% block body_scripts %}
+    <script src="{{ url_for('static', filename='js/trash.js') }}"></script>
+{% endblock %}

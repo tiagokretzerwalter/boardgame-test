@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+}
+.left-side, .right-side {
+    width: 48%;
+}
+.board, .deck {
+    border: 1px solid black;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.flex-container {
+    display: flex;
+    align-items: center;
+}
+.flex-container h2 {
+    margin-right: 10px;
+}
+.other-players-boards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.other-player-board {
+    flex: 1;
+    min-width: 120px; /* Adjust this value as needed */
+}

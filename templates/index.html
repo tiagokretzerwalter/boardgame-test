@@ -1,46 +1,22 @@
-<!doctype html>
-<html>
-<head>
-    <title>Card Game</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-</head>
-<body>
-    <h1>Select a Player</h1>
-    <ul>
-        {% for i in range(1, 7) %}
-            <li><a href="/player/{{ i }}">Player {{ i }}</a></li>
-        {% endfor %}
-    </ul>
+{% extends "base.html" %}
+
+{% block title %}Capytopia{% endblock %}
+
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+
+{% block content %}
     <h2>Shuffle Decks</h2>
     <button id="shuffle_deck1">Shuffle Deck 1</button>
     <button id="shuffle_deck2">Shuffle Deck 2</button>
     <button id="shuffle_characters">Shuffle Characters' Deck</button>
     <h2>Reset Game</h2>
     <button id="reset_game">Reset Game</button>
-    <h2>Trash Deck</h2>
-    <button onclick="window.location.href='/trash'">View Trash Deck</button>
+{% endblock %}
 
-    <script>
-        $(document).ready(function() {
-            var socket = io();
-
-            $('#shuffle_deck1').click(function() {
-                socket.emit('shuffle_deck', { deck: 'deck1' });
-            });
-
-            $('#shuffle_deck2').click(function() {
-                socket.emit('shuffle_deck', { deck: 'deck2' });
-            });
-
-            $('#shuffle_characters').click(function() {
-                socket.emit('shuffle_deck', { deck: 'characters_deck' });
-            });
-
-            $('#reset_game').click(function() {
-                socket.emit('reset_game');
-            });
-        });
-    </script>
-</body>
-</html>
+{% block body_scripts %}
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}
