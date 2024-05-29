@@ -26,6 +26,13 @@
             border: 1px solid black;
             padding: 10px;
         }
+        .flex-container {
+            display: flex;
+            align-items: center;
+        }
+        .flex-container h2 {
+            margin-right: 10px; /* Optional: Add some space between the h2 and the div */
+        }
     </style>
 </head>
 <body>
@@ -36,20 +43,26 @@
             <button id="draw_deck2">Pescar do monte de ação</button>
             <button id="draw_character">Pescar um personagem</button>
 
-            <div class="board">
-                <h2>Seu personagem</h2>
-                <div id="character"></div>
+            <div>
+                <div class="flex-container">
+                    <h2>Seu personagem: </h2>
+                    <div id="character"></div>
+                </div>
             </div>
 
             <div class="board">
-                <h2>Sua mão de cartas de utopia</h2>
-                <button id="shuffle_player_deck1">Misturar cartas de utopia</button>
+                <div class="flex-container">
+                    <h2>Your Deck from Deck 1</h2>
+                    <button id="shuffle_player_deck1">Shuffle Deck 1</button>
+                </div>
                 <div id="deck1" class="deck"></div>
             </div>
 
             <div class="board">
-                <h2>Sua mão de cartas de ação</h2>
-                <button id="shuffle_player_deck2">Misturar cartas de ação</button>
+                <div class="flex-container">
+                    <h2>Your Deck from Deck 2</h2>
+                    <button id="shuffle_player_deck2">Shuffle Deck 2</button>
+                </div>
                 <div id="deck2" class="deck"></div>
             </div>
         </div>
@@ -114,10 +127,9 @@
                     var cardElement = `<div>${card}</div>`;
                     var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
                     var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">--> Mão Utopia</button>`;
-                    var moveButtonToDeck2 = `<button class="move-to-deck2" data-card="${card}">ERRO</button>`;
                     var sendButtons = generateSendButtons(card, "board");
                     var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">--> Monte Utopia</button>`;
-                    $('#board').append(cardElement + trashButton, moveButtonToDeck1, moveButtonToDeck2, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1, move to deck 2 and sendButtons
+                    $('#board').append(cardElement + trashButton, moveButtonToDeck1, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1 and sendButtons
                 });
 
                 $('#other_players_boards').empty();
@@ -161,11 +173,6 @@
             $(document).on('click', '.move-to-deck1', function() {
                 var card = $(this).data('card');
                 socket.emit('move_to_deck1', { player_id: player_id, card: card });
-            });
-
-            $(document).on('click', '.move-to-deck2', function() {
-                var card = $(this).data('card');
-                socket.emit('move_to_deck2', { player_id: player_id, card: card });
             });
 
             $(document).on('click', '.send_to_deck1', function() {

@@ -16,8 +16,12 @@
     <h1>Trash Deck</h1>
 
     <div class="trash-deck">
-        <h2>Trash Deck</h2>
-        <div id="trash_deck"></div>
+        <h2>Utopia Trash Deck</h2>
+        <div id="utopia_trash_deck"></div>
+    </div>
+    <div class="trash-deck">
+        <h2>Utopia Trash Deck</h2>
+        <div id="acao_trash_deck"></div>
     </div>
     <div></div>
     <ul>
@@ -31,26 +35,31 @@
             var socket = io();
             
             socket.on('update', function(data) {
-                $('#trash_deck').empty();
-                data.trash_deck.forEach(function(card) {
+                $('#utopia_trash_deck').empty();
+                data.utopia_trash_deck.forEach(function(card) {
                     var cardElement = `<div>${card}</div>`;
                     var sendButtons = generateSendButtons(card);
-                    $('#trash_deck').append(cardElement + sendButtons);
+                    $('#utopia_trash_deck').append(cardElement + sendButtons);
+                });
+                $('#acao_trash_deck').empty();
+                data.acao_trash_deck.forEach(function(card) {
+                    var cardElement = `<div>${card}</div>`;
+                    var sendButtons = generateSendButtons(card);
+                    $('#acao_trash_deck').append(cardElement + sendButtons);
                 });
             });
 
             $(document).on('click', '.send-from-trash', function() {
                 var card = $(this).data('card');
                 var targetPlayer = $(this).data('target-player');
-                var targetDeck = $(this).data('target-deck');
-                socket.emit('send_card_from_trash', { target_player: targetPlayer, card: card, target_deck: targetDeck });
+                socket.emit('send_card_from_trash', { target_player: targetPlayer, card: card });
             });
 
             function generateSendButtons(card) {
                 var sendButtons = '';
                 for (var i = 1; i <= 6; i++) {
-                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck1">--> Player ${i} Utopia</button>`;
-                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" data-target-deck="deck2">--> Player ${i} Ação</button>`;
+                    sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" >--> Player ${i}</button>`;
+                    
                 }
                 return sendButtons;
             }
