@@ -16,4 +16,8 @@ $(document).ready(function() {
     $('#reset_game').click(function() {
         socket.emit('reset_game');
     });
+
+    socket.on('update_counter', function(data) {
+        $('#draw-counter').text(data.counter);
+    });
 });

@@ -35,12 +35,13 @@ deck2 = original_deck2.copy()
 utopia_trash_deck = []
 acao_trash_deck = []
 players = {f'Player {i}': {'deck1': [], 'deck2': [], 'board': [], 'character': []} for i in range(1, 7)}
+counter = -5
 
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', counter = counter)
 
 @app.route('/player/<int:player_id>')
 def player(player_id):
@@ -53,10 +54,17 @@ def trash():
 @socketio.on('connect')
 def handle_connect():
     emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players}, broadcast=True)
+    emit('update_counter', {'counter': counter})
 
 @socketio.on('disconnect')
 def handle_disconnect():
     emit('update', {'deck1': deck1, 'deck2': deck2, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players}, broadcast=True)
+    
+@socketio.on('increment_counter')
+def increment_counter():
+    global counter
+    counter += 1
+    emit('update_counter', {'counter': counter}, broadcast=True)
 
 @socketio.on('draw_card')
 def draw_card(data):

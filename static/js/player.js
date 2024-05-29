@@ -4,10 +4,16 @@ $(document).ready(function() {
 
     $('#draw_deck1').click(function() {
         socket.emit('draw_card', { player_id: player_id, deck: 'deck1' });
+        if (player_id == 1) {
+            socket.emit('increment_counter');
+        }
     });
 
     $('#draw_deck2').click(function() {
         socket.emit('draw_card', { player_id: player_id, deck: 'deck2' });
+        if (player_id == 1) {
+            socket.emit('increment_counter');
+        }
     });
 
     $('#draw_character').click(function() {
