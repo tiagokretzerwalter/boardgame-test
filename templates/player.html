@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/player.css') }}">
 {% endblock %}
 
+{% block nav %}
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/trash">Trash</a></li>
+        <li>Último a pescar: Player <span id="previous_player">{{ previous_player }}</span></li>
+    </ul>
+{% endblock %}
+
 
 {% block content %}
     <h1>Player {{ player_id }}</h1>
