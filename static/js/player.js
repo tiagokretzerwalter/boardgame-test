@@ -56,8 +56,10 @@ $(document).ready(function() {
         Object.keys(data.players).forEach(function(player) {
             if (player !== 'Player ' + player_id) {
                 var playerBoard = `<div class="other-player-board"><h3>${player}'s Board</h3>`;
+                var cardNumber = 1
                 data.players[player].board.forEach(function(card) {
-                    playerBoard += `<div>${card}</div>`;
+                    playerBoard += `<div>${cardNumber} - ${card}</div>`;
+                    cardNumber += 1;
                 });
                 playerBoard += `</div>`;
                 $('#other_players_boards').append(playerBoard);
