@@ -12,8 +12,8 @@
     <h1>Player {{ player_id }}</h1>
     <div class="container" data-player-id="{{ player_id }}">
         <div class="left-side">
-            <button id="draw_deck1">Pescar do monte de utopia</button>
-            <button id="draw_deck2">Pescar do monte de ação</button>
+            <button id="draw_utopia_card">Pescar do monte de utopia</button>
+            <button id="draw_acao_card">Pescar do monte de ação</button>
             <button id="draw_character">Pescar um personagem</button>
 
             <div>
@@ -25,18 +25,18 @@
 
             <div class="board">
                 <div class="flex-container">
-                    <h2>Your Deck from Deck 1</h2>
-                    <button id="shuffle_player_deck1">Shuffle Deck 1</button>
+                    <h2>Sua mão de utopia</h2>
+                    <button id="shuffle_player_utopia_hand">Embaralhar mão de utopia</button>
                 </div>
-                <div id="deck1" class="deck"></div>
+                <div id="utopia_hand" class="deck"></div>
             </div>
 
             <div class="board">
                 <div class="flex-container">
-                    <h2>Your Deck from Deck 2</h2>
-                    <button id="shuffle_player_deck2">Shuffle Deck 2</button>
+                    <h2>Sua mão de ação</h2>
+                    <button id="shuffle_player_acao_hand">Embaralhar mão de ação</button>
                 </div>
-                <div id="deck2" class="deck"></div>
+                <div id="acao_hand" class="deck"></div>
             </div>
         </div>
 
@@ -50,8 +50,6 @@
                 <h2>Utopia de outros jogadores</h2>
                 <div id="other_players_boards" class="other-players-boards"></div>
             </div>
-
-            <button onclick="window.location.href='/trash'">Ver lixo</button>
         </div>
     </div>
 {% endblock %}

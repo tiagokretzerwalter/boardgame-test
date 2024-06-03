@@ -1,12 +1,12 @@
 $(document).ready(function() {
     var socket = io();
 
-    $('#shuffle_deck1').click(function() {
-        socket.emit('shuffle_deck', { deck: 'deck1' });
+    $('#shuffle_utopia_deck').click(function() {
+        socket.emit('shuffle_deck', { deck: 'utopia_deck' });
     });
 
-    $('#shuffle_deck2').click(function() {
-        socket.emit('shuffle_deck', { deck: 'deck2' });
+    $('#shuffle_acao_deck').click(function() {
+        socket.emit('shuffle_deck', { deck: 'acao_deck' });
     });
 
     $('#shuffle_characters').click(function() {

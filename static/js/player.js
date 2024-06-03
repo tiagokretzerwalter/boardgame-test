@@ -2,15 +2,15 @@ $(document).ready(function() {
     var socket = io();
     var player_id = $('.container').data('player-id');
 
-    $('#draw_deck1').click(function() {
-        socket.emit('draw_card', { player_id: player_id, deck: 'deck1' });
+    $('#draw_utopia_card').click(function() {
+        socket.emit('draw_card', { player_id: player_id, deck: 'utopia_deck' });
         if (player_id == 1) {
             socket.emit('increment_counter');
         }
     });
 
-    $('#draw_deck2').click(function() {
-        socket.emit('draw_card', { player_id: player_id, deck: 'deck2' });
+    $('#draw_acao_card').click(function() {
+        socket.emit('draw_card', { player_id: player_id, deck: 'acao_deck' });
         if (player_id == 1) {
             socket.emit('increment_counter');
         }
@@ -27,29 +27,29 @@ $(document).ready(function() {
             var cardElement = `<div>${card}</div>`;
             $('#character').append(cardElement);
         });
-        $('#deck1').empty();
-        playerData.deck1.forEach(function(card) {
+        $('#utopia_hand').empty();
+        playerData.utopia_hand.forEach(function(card) {
             var cardElement = `<div>${card}</div>`;
-            var useButton = `<button class="use-deck1-card" data-card="${card}">Aplicar</button>`;
-            var sendButtons = generateSendButtons(card, 1);
+            var useButton = `<button class="use-utopia-card" data-card="${card}">Aplicar</button>`;
+            var sendButtons = generateSendButtons(card, "utopia");
             var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
-            $('#deck1').append(cardElement + useButton + sendButtons + trashButton); // Append card, use button, send buttons, and trash button
+            $('#utopia_hand').append(cardElement + useButton + sendButtons + trashButton); // Append card, use button, send buttons, and trash button
         });
-        $('#deck2').empty();
-        playerData.deck2.forEach(function(card) {
+        $('#acao_hand').empty();
+        playerData.acao_hand.forEach(function(card) {
             var cardElement = `<div>${card}</div>`;
-            var sendButtons = generateSendButtons(card, 2);
+            var sendButtons = generateSendButtons(card, "acao");
             var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
-            $('#deck2').append(cardElement + sendButtons + trashButton); // Append card, send buttons, and trash button
+            $('#acao_hand').append(cardElement + sendButtons + trashButton); // Append card, send buttons, and trash button
         });
         $('#board').empty();
         playerData.board.forEach(function(card) {
             var cardElement = `<div>${card}</div>`;
             var trashButton = `<button class="send-to-trash" data-card="${card}">Lixo</button>`;
-            var moveButtonToDeck1 = `<button class="move-to-deck1" data-card="${card}">--> Mão Utopia</button>`;
+            var moveButtonToUtopiaHand = `<button class="move-to-utopia-hand" data-card="${card}">--> Mão Utopia</button>`;
             var sendButtons = generateSendButtons(card, "board");
-            var sendToDeck1 = `<button class="send_to_deck1" data-card="${card}">--> Monte Utopia</button>`;
-            $('#board').append(cardElement + trashButton, moveButtonToDeck1, sendButtons, sendToDeck1); // Append card, trash button, move to deck 1 and sendButtons
+            var sendToUtopiaDeck = `<button class="send_to_utopia_deck" data-card="${card}">--> Monte Utopia</button>`;
+            $('#board').append(cardElement + trashButton, moveButtonToUtopiaHand, sendButtons, sendToUtopiaDeck); // Append card, trash button, move to deck 1 and sendButtons
         });
 
         $('#other_players_boards').empty();
@@ -65,15 +65,15 @@ $(document).ready(function() {
         });
     });
 
-    $('#shuffle_player_deck1').click(function() {
-        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'deck1' });
+    $('#shuffle_player_utopia_hand').click(function() {
+        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'utopia_hand' });
     });
 
-    $('#shuffle_player_deck2').click(function() {
-        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'deck2' });
+    $('#shuffle_player_acao_hand').click(function() {
+        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'acao_hand' });
     });
 
-    $(document).on('click', '.use-deck1-card', function() {
+    $(document).on('click', '.use-utopia-card', function() {
         var card = $(this).data('card');
         socket.emit('use_card', { player_id: player_id, card: card });
     });
@@ -90,27 +90,27 @@ $(document).ready(function() {
         socket.emit('send_card_to_trash', { player_id: player_id, card: card });
     });
 
-    $(document).on('click', '.move-to-deck1', function() {
+    $(document).on('click', '.move-to-utopia-hand', function() {
         var card = $(this).data('card');
-        socket.emit('move_to_deck1', { player_id: player_id, card: card });
+        socket.emit('move_to_utopia_hand', { player_id: player_id, card: card });
     });
 
-    $(document).on('click', '.send_to_deck1', function() {
+    $(document).on('click', '.send_to_utopia_deck', function() {
         var card = $(this).data('card');
-        socket.emit('send_to_deck1', { player_id: player_id, card: card });
+        socket.emit('send_to_utopia_deck', { player_id: player_id, card: card });
     });
 
-    function generateSendButtons(card, deckNumber) {
+    function generateSendButtons(card, deckName) {
         var sendButtons = '';
         for (var i = 1; i <= 6; i++) {
-            if (deckNumber == "board") {
+            if (deckName == "board") {
                 if (i !== player_id) {
                     sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
                 }
             }
             else {
                 if (i !== player_id) {
-                    sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="deck${deckNumber}">--> Player ${i}</button>`;
+                    sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="${deckName}_hand">--> Player ${i}</button>`;
                 }
             }                    
         }
