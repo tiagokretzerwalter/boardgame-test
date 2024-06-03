@@ -63,6 +63,7 @@ $(document).ready(function() {
                 $('#other_players_boards').append(playerBoard);
             }
         });
+        $('#previous_player').text(data.previous_player);
     });
 
     $('#shuffle_player_utopia_hand').click(function() {

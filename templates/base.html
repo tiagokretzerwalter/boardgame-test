@@ -23,6 +23,7 @@
                 {% for i in range(1, 7) %}
                     <li><a href="/player/{{ i }}">Player {{ i }}</a></li>
                 {% endfor %}
+                <li>Último a pescar: Player <span id="previous_player">{{ previous_player }}</span></li>
             </ul>
         {% endblock %}
     </nav>
