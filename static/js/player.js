@@ -69,11 +69,11 @@ $(document).ready(function() {
     });
 
     $('#shuffle_player_utopia_hand').click(function() {
-        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'utopia_hand' });
+        socket.emit('shuffle_deck', { player_id: player_id, deck: 'utopia_hand' });
     });
 
     $('#shuffle_player_acao_hand').click(function() {
-        socket.emit('shuffle_player_deck', { player_id: player_id, deck: 'acao_hand' });
+        socket.emit('shuffle_deck', { player_id: player_id, deck: 'acao_hand' });
     });
 
     $(document).on('click', '.use-utopia-card', function() {

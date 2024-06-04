@@ -34,7 +34,17 @@ decks_mapping = {
     'characters_deck': (characters_deck, 'character_hand')
 }
 
-
+def broadcast_game_state():
+    emit('update', {
+        'utopia_deck': utopia_deck,
+        'acao_deck': acao_deck,
+        'characters_deck': characters_deck,
+        'utopia_trash_deck': utopia_trash_deck,
+        'acao_trash_deck': acao_trash_deck,
+        'players': players,
+        'previous_player': previous_player,
+        'counter': counter
+    }, broadcast=True)
 
 @app.route('/')
 def index():
@@ -47,18 +57,6 @@ def player(player_id):
 @app.route('/trash')
 def trash():
     return render_template('trash.html', utopia_trash_deck=utopia_trash_deck, acao_trash_deck=acao_trash_deck)
-
-def broadcast_game_state():
-    emit('update', {
-        'utopia_deck': utopia_deck,
-        'acao_deck': acao_deck,
-        'characters_deck': characters_deck,
-        'utopia_trash_deck': utopia_trash_deck,
-        'acao_trash_deck': acao_trash_deck,
-        'players': players,
-        'previous_player': previous_player,
-        'counter': counter
-    }, broadcast=True)
 
 @socketio.on('connect')
 def handle_connect():
@@ -80,11 +78,10 @@ def draw_card(data):
     deck_name = data['deck']
     global previous_player
     previous_player = data["player_id"]
-    if deck_name in decks_mapping:
-        deck, hand = decks_mapping[deck_name]
-        if deck:
-            card = deck.pop()
-            players[player_id][hand].append(card)
+    deck, hand = decks_mapping[deck_name]
+    if deck:
+        card = deck.pop()
+        players[player_id][hand].append(card)
     broadcast_game_state()
 
 @socketio.on('shuffle_deck')
@@ -92,16 +89,13 @@ def shuffle_deck(data):
     deck_name = data['deck']
     if deck_name in decks_mapping:
         random.shuffle(decks_mapping[deck_name][0])
-    broadcast_game_state()
-
-@socketio.on('shuffle_player_deck')
-def shuffle_player_deck(data):
-    player_id = f'Player {data["player_id"]}'
-    deck_name = data['deck']
-    if deck_name == 'utopia_hand':
-        random.shuffle(players[player_id]['utopia_hand'])
-    elif deck_name == 'acao_hand':
-        random.shuffle(players[player_id]['acao_hand'])
+    player_id = data.get("player_id")
+    if player_id is not None:
+        player_id = f'Player {data["player_id"]}'
+        if deck_name == 'utopia_hand':
+            random.shuffle(players[player_id]['utopia_hand'])
+        elif deck_name == 'acao_hand':
+            random.shuffle(players[player_id]['acao_hand'])
     broadcast_game_state()
 
 @socketio.on('reset_game')
