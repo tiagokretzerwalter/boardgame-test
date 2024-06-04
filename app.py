@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 import random
 from dotenv import load_dotenv
-import csv
+from helpers import import_deck
 
 
 load_dotenv()
@@ -12,31 +12,27 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret_key')
 socketio = SocketIO(app)
 
-utopia_csv_file_path = 'data/utopia_cards.csv'
-acao_csv_file_path = 'data/acao_cards.csv'
-
 original_utopia_deck = []
 original_acao_deck = []
-
-with open(utopia_csv_file_path, 'r', encoding='utf-8') as file:
-    csv_reader = csv.DictReader(file)
-    for row in csv_reader:
-        original_utopia_deck.append(row['Utopia'])
-
-with open(acao_csv_file_path, 'r', encoding='utf-8') as file:
-    csv_reader = csv.DictReader(file)
-    for row in csv_reader:
-        original_acao_deck.append(row['Ação'])
-
 original_characters_deck = ["Gorda", "Trabalhadora", "Ninja", "Amiga", "Blogueira", "Envergonhada"]
+
+import_deck('data/utopia_cards.csv', original_utopia_deck, 'Utopia')
+import_deck('data/acao_cards.csv', original_acao_deck, 'Ação')
+
 characters_deck = original_characters_deck.copy()
 utopia_deck = original_utopia_deck.copy()
 acao_deck = original_acao_deck.copy()
 utopia_trash_deck = []
 acao_trash_deck = []
-players = {f'Player {i}': {'utopia_hand': [], 'acao_hand': [], 'board': [], 'character': []} for i in range(1, 7)}
+players = {f'Player {i}': {'utopia_hand': [], 'acao_hand': [], 'board': [], 'character_hand': []} for i in range(1, 7)}
 counter = -5
 previous_player = 1
+
+decks_mapping = {
+    'utopia_deck': (utopia_deck, 'utopia_hand'),
+    'acao_deck': (acao_deck, 'acao_hand'),
+    'characters_deck': (characters_deck, 'character_hand')
+}
 
 
 
@@ -52,20 +48,31 @@ def player(player_id):
 def trash():
     return render_template('trash.html', utopia_trash_deck=utopia_trash_deck, acao_trash_deck=acao_trash_deck)
 
+def broadcast_game_state():
+    emit('update', {
+        'utopia_deck': utopia_deck,
+        'acao_deck': acao_deck,
+        'characters_deck': characters_deck,
+        'utopia_trash_deck': utopia_trash_deck,
+        'acao_trash_deck': acao_trash_deck,
+        'players': players,
+        'previous_player': previous_player,
+        'counter': counter
+    }, broadcast=True)
+
 @socketio.on('connect')
 def handle_connect():
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
-    emit('update_counter', {'counter': counter})
+    broadcast_game_state()
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
     
 @socketio.on('increment_counter')
 def increment_counter():
     global counter
     counter += 1
-    emit('update_counter', {'counter': counter}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('draw_card')
 def draw_card(data):
@@ -73,27 +80,19 @@ def draw_card(data):
     deck_name = data['deck']
     global previous_player
     previous_player = data["player_id"]
-    if deck_name == 'utopia_deck' and utopia_deck:
-        card = utopia_deck.pop()
-        players[player_id]['utopia_hand'].append(card)
-    elif deck_name == 'acao_deck' and acao_deck:
-        card = acao_deck.pop()
-        players[player_id]['acao_hand'].append(card)
-    elif deck_name == 'character' and characters_deck:
-        card = characters_deck.pop()
-        players[player_id]['character'].append(card)    
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    if deck_name in decks_mapping:
+        deck, hand = decks_mapping[deck_name]
+        if deck:
+            card = deck.pop()
+            players[player_id][hand].append(card)
+    broadcast_game_state()
 
 @socketio.on('shuffle_deck')
 def shuffle_deck(data):
     deck_name = data['deck']
-    if deck_name == 'utopia_deck':
-        random.shuffle(utopia_deck)
-    elif deck_name == 'acao_deck':
-        random.shuffle(acao_deck)
-    elif deck_name == "characters_deck":
-        random.shuffle(characters_deck)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    if deck_name in decks_mapping:
+        random.shuffle(decks_mapping[deck_name][0])
+    broadcast_game_state()
 
 @socketio.on('shuffle_player_deck')
 def shuffle_player_deck(data):
@@ -103,18 +102,22 @@ def shuffle_player_deck(data):
         random.shuffle(players[player_id]['utopia_hand'])
     elif deck_name == 'acao_hand':
         random.shuffle(players[player_id]['acao_hand'])
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('reset_game')
 def reset_game():
-    global utopia_deck, utopia_deck, utopia_trash_deck, acao_trash_deck, players
+    global utopia_deck, acao_deck, characters_deck, utopia_trash_deck, acao_trash_deck, players, counter, decks_mapping
     utopia_deck = original_utopia_deck.copy()
     acao_deck = original_acao_deck.copy()
     characters_deck = original_characters_deck.copy()
     utopia_trash_deck = []
     acao_trash_deck = []
-    players = {f'Player {i}': {'utopia_hand': [], 'acao_hand': [], 'board': [], 'character': []} for i in range(1, 7)}
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    counter = -5
+    players = {f'Player {i}': {'utopia_hand': [], 'acao_hand': [], 'board': [], 'character_hand': []} for i in range(1, 7)}
+    decks_mapping['utopia_deck'] = (utopia_deck, 'utopia_hand')
+    decks_mapping['acao_deck'] = (acao_deck, 'acao_hand')
+    decks_mapping['characters_deck'] = (characters_deck, 'character_hand')
+    broadcast_game_state()
 
 @socketio.on('use_card')
 def use_card(data):
@@ -125,7 +128,7 @@ def use_card(data):
     elif card in players[player_id]['acao_hand']:
         players[player_id]['acao_hand'].remove(card)
     players[player_id]['board'].append(card)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('send_card')
 def send_card(data):
@@ -136,7 +139,7 @@ def send_card(data):
     if card in players[player_id][target_deck]:
         players[player_id][target_deck].remove(card)
         players[target_player][target_deck].append(card)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('send_card_to_trash')
 def send_card_to_trash(data):
@@ -151,7 +154,7 @@ def send_card_to_trash(data):
     elif card in players[player_id]['board']:
         players[player_id]['board'].remove(card)
         utopia_trash_deck.append(card)    
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('send_card_from_trash')
 def send_card_from_trash(data):
@@ -163,7 +166,7 @@ def send_card_from_trash(data):
     if card in utopia_trash_deck:
         utopia_trash_deck.remove(card)
         players[target_player]['utopia_hand'].append(card)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('move_to_utopia_hand')
 def move_to_utopia_hand(data):
@@ -171,7 +174,7 @@ def move_to_utopia_hand(data):
     card = data['card']
     players[player_id]['board'].remove(card)
     players[player_id]['utopia_hand'].append(card)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('send_to_utopia_deck')
 def send_to_utopia_deck(data):
@@ -179,7 +182,7 @@ def send_to_utopia_deck(data):
     card = data['card']
     players[player_id]['board'].remove(card)
     utopia_deck.append(card)
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 @socketio.on('reset_trash')
 def reset_trash(data):
@@ -191,7 +194,7 @@ def reset_trash(data):
     if deck_name == 'acao_trash_deck':
         acao_deck.extend(acao_trash_deck)
         acao_trash_deck = []    
-    emit('update', {'utopia_deck': utopia_deck, 'acao_deck': acao_deck, 'characters_deck': characters_deck, 'utopia_trash_deck': utopia_trash_deck, 'acao_trash_deck': acao_trash_deck, 'players': players, 'previous_player': previous_player}, broadcast=True)
+    broadcast_game_state()
 
 
 if __name__ == '__main__':

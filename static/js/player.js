@@ -17,15 +17,15 @@ $(document).ready(function() {
     });
 
     $('#draw_character').click(function() {
-        socket.emit('draw_card', { player_id: player_id, deck: 'character' });
+        socket.emit('draw_card', { player_id: player_id, deck: 'characters_deck' });
     });
 
     socket.on('update', function(data) {
         var playerData = data.players['Player ' + player_id];
-        $('#character').empty();
-        playerData.character.forEach(function(card) {
+        $('#character_hand').empty();
+        playerData.character_hand.forEach(function(card) {
             var cardElement = `<div>${card}</div>`;
-            $('#character').append(cardElement);
+            $('#character_hand').append(cardElement);
         });
         $('#utopia_hand').empty();
         playerData.utopia_hand.forEach(function(card) {
