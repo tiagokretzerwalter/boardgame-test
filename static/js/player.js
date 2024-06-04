@@ -95,12 +95,12 @@ $(document).ready(function() {
 
     $(document).on('click', '.move-to-utopia-hand', function() {
         var card = $(this).data('card');
-        socket.emit('move_to_utopia_hand', { player_id: player_id, card: card });
+        socket.emit('move_to_utopia', { player_id: player_id, card: card, target_deck: "utopia_hand" });
     });
 
     $(document).on('click', '.send_to_utopia_deck', function() {
         var card = $(this).data('card');
-        socket.emit('send_to_utopia_deck', { player_id: player_id, card: card });
+        socket.emit('move_to_utopia', { player_id: player_id, card: card, target_deck: "utopia_deck" });
     });
 
     function generateSendButtons(card, deckName) {

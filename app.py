@@ -117,11 +117,20 @@ def reset_game():
 def use_card(data):
     player_id = f'Player {data["player_id"]}'
     card = data['card']
-    if card in players[player_id]['utopia_hand']:
-        players[player_id]['utopia_hand'].remove(card)
-    elif card in players[player_id]['acao_hand']:
-        players[player_id]['acao_hand'].remove(card)
+    players[player_id]['utopia_hand'].remove(card)
     players[player_id]['board'].append(card)
+    broadcast_game_state()
+
+@socketio.on('move_to_utopia')
+def move_to_utopia(data):
+    player_id = f'Player {data["player_id"]}'
+    card = data['card']
+    target_deck = data['target_deck']
+    players[player_id]['board'].remove(card)
+    if target_deck == 'utopia_hand':
+        players[player_id]['utopia_hand'].append(card)
+    elif target_deck == 'utopia_deck':
+        utopia_deck.append(card)
     broadcast_game_state()
 
 @socketio.on('send_card')
@@ -162,22 +171,6 @@ def send_card_from_trash(data):
         players[target_player]['utopia_hand'].append(card)
     broadcast_game_state()
 
-@socketio.on('move_to_utopia_hand')
-def move_to_utopia_hand(data):
-    player_id = f'Player {data["player_id"]}'
-    card = data['card']
-    players[player_id]['board'].remove(card)
-    players[player_id]['utopia_hand'].append(card)
-    broadcast_game_state()
-
-@socketio.on('send_to_utopia_deck')
-def send_to_utopia_deck(data):
-    player_id = f'Player {data["player_id"]}'
-    card = data['card']
-    players[player_id]['board'].remove(card)
-    utopia_deck.append(card)
-    broadcast_game_state()
-
 @socketio.on('reset_trash')
 def reset_trash(data):
     global utopia_trash_deck, acao_trash_deck
@@ -187,7 +180,7 @@ def reset_trash(data):
         utopia_trash_deck = []
     if deck_name == 'acao_trash_deck':
         acao_deck.extend(acao_trash_deck)
-        acao_trash_deck = []    
+        acao_trash_deck = []
     broadcast_game_state()
 
 
