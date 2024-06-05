@@ -133,8 +133,8 @@ def move_to_utopia(data):
         utopia_deck.append(card)
     broadcast_game_state()
 
-@socketio.on('send_card')
-def send_card(data):
+@socketio.on('send_card_to_player')
+def send_card_to_player(data):
     player_id = f'Player {data["player_id"]}'
     target_player = f'Player {data["target_player"]}'
     card = data['card']

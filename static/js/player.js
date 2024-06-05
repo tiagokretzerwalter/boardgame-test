@@ -85,7 +85,7 @@ $(document).ready(function() {
         var card = $(this).data('card');
         var targetPlayer = $(this).data('target-player');
         var targetDeck = $(this).data('target-deck');
-        socket.emit('send_card', { player_id: player_id, card: card, target_player: targetPlayer, target_deck: targetDeck });
+        socket.emit('send_card_to_player', { player_id: player_id, card: card, target_player: targetPlayer, target_deck: targetDeck });
     });
 
     $(document).on('click', '.send-to-trash', function() {
