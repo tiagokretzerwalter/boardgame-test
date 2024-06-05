@@ -1,4 +1,4 @@
-#Board game simulator
+# Board game simulator
 
 Welcome to the Board game simulator! This project was created as a way to allow me to test a board game that I am developing with friends. 
 The project implements a real-time multiplayer card game using Python with Flask-SocketIO on the backend and jQuery on the frontend. Players can draw cards, shuffle decks, and interact with the game board in a collaborative and competitive environment. Everything that the board game would require you to do in real life, you can do within this webapp.
