@@ -18,9 +18,9 @@ $(document).ready(function() {
         });
 
         $(document).on('click', '.send-from-trash', function() {
-            var card = $(this).data('card');
+            var cardId = $(this).data('card-id');
             var targetPlayer = $(this).data('target-player');
-            socket.emit('send_card_from_trash', { target_player: targetPlayer, card: card });
+            socket.emit('send_card_from_trash', { target_player: targetPlayer, card_id: cardId });
         });
     };
     
@@ -28,7 +28,7 @@ $(document).ready(function() {
         var deckElement = $('#' + deckId);
         deckElement.empty();
         deckData.forEach(function(card) {
-            var cardElement = `<div>${card}</div>`;
+            var cardElement = `<div>${card.name}</div>`;
             var sendButtons = generateSendButtons(card);
             deckElement.append(cardElement + sendButtons);
         });
@@ -37,7 +37,7 @@ $(document).ready(function() {
     function generateSendButtons(card) {
         var sendButtons = '';
         for (var i = 1; i <= 6; i++) {
-            sendButtons += `<button class="send-from-trash" data-card="${card}" data-target-player="${i}" >--> Player ${i}</button>`;
+            sendButtons += `<button class="send-from-trash" data-card-id="${card.id}" data-target-player="${i}" >--> Player ${i}</button>`;
             
         };
         return sendButtons;

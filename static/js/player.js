@@ -36,30 +36,30 @@ $(document).ready(function() {
         });
     
         $(document).on('click', '.use-utopia-card', function() {
-            var card = $(this).data('card');
-            socket.emit('use_card', { player_id: player_id, card: card });
+            var cardId = $(this).data('card-id');
+            socket.emit('use_card', { player_id: player_id, card_id: cardId });
         });
     
         $(document).on('click', '.send-card', function() {
-            var card = $(this).data('card');
+            var cardId = $(this).data('card-id');
             var targetPlayer = $(this).data('target-player');
             var targetDeck = $(this).data('target-deck');
-            socket.emit('send_card_to_player', { player_id: player_id, card: card, target_player: targetPlayer, target_deck: targetDeck });
+            socket.emit('send_card_to_player', { player_id: player_id, card_id: cardId, target_player: targetPlayer, target_deck: targetDeck });
         });
     
         $(document).on('click', '.send-to-trash', function() {
-            var card = $(this).data('card');
-            socket.emit('send_card_to_trash', { player_id: player_id, card: card });
+            var cardId = $(this).data('card-id');
+            socket.emit('send_card_to_trash', { player_id: player_id, card_id: cardId });
         });
     
         $(document).on('click', '.move-to-utopia-hand', function() {
-            var card = $(this).data('card');
-            socket.emit('move_to_utopia', { player_id: player_id, card: card, target_deck: "utopia_hand" });
+            var cardId = $(this).data('card-id');
+            socket.emit('move_to_utopia', { player_id: player_id, card_id: cardId, target_deck: "utopia_hand" });
         });
     
         $(document).on('click', '.send_to_utopia_deck', function() {
-            var card = $(this).data('card');
-            socket.emit('move_to_utopia', { player_id: player_id, card: card, target_deck: "utopia_deck" });
+            var cardId = $(this).data('card-id');
+            socket.emit('move_to_utopia', { player_id: player_id, card_id: cardId, target_deck: "utopia_deck" });
         });
     };    
 
@@ -67,12 +67,12 @@ $(document).ready(function() {
         var element = $(elementId);
         element.empty();
         handData.forEach(function(card) {
-            var cardElement = `<div>${card}</div>`;
-            var useButton = handType === 'utopia' ? `<button class="use-utopia-card" data-card="${card}">Aplicar</button>` : '';
+            var cardElement = `<div>${card.name}</div>`;
+            var useButton = handType === 'utopia' ? `<button class="use-utopia-card" data-card-id="${card.id}">Aplicar</button>` : '';
             var sendButtons = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? generateSendButtons(card, handType) : '';
-            var trashButton = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? `<button class="send-to-trash" data-card="${card}">Lixo</button>` : '';
-            var moveButtonToUtopiaHand = (handType === 'board') ? `<button class="move-to-utopia-hand" data-card="${card}">--> Mão Utopia</button>` : '';
-            var sendToUtopiaDeck = (handType === 'board') ? `<button class="send_to_utopia_deck" data-card="${card}">--> Monte Utopia</button>` : '';
+            var trashButton = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? `<button class="send-to-trash" data-card-id="${card.id}">Lixo</button>` : '';
+            var moveButtonToUtopiaHand = (handType === 'board') ? `<button class="move-to-utopia-hand" data-card-id="${card.id}">--> Mão Utopia</button>` : '';
+            var sendToUtopiaDeck = (handType === 'board') ? `<button class="send_to_utopia_deck" data-card-id="${card.id}">--> Monte Utopia</button>` : '';
             element.append(cardElement + useButton + sendButtons + trashButton + moveButtonToUtopiaHand + sendToUtopiaDeck);
         });
     };
@@ -85,7 +85,7 @@ $(document).ready(function() {
                 var playerBoard = `<div class="other-player-board"><h3>${player}'s Board</h3>`;
                 var cardNumber = 1;
                 playersData[player].board.forEach(function(card) {
-                    playerBoard += `<div>${cardNumber} - ${card}</div>`;
+                    playerBoard += `<div>${cardNumber} - ${card.name}</div>`;
                     cardNumber += 1;
                 });
                 playerBoard += `</div>`;
@@ -110,12 +110,12 @@ $(document).ready(function() {
         for (var i = 1; i <= 6; i++) {
             if (deckName == "board") {
                 if (i !== player_id) {
-                    sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
+                    sendButtons += `<button class="send-card" data-card-id="${card.id}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
                 };
             }
             else {
                 if (i !== player_id) {
-                    sendButtons += `<button class="send-card" data-card="${card}" data-target-player="${i}" data-target-deck="${deckName}_hand">--> Player ${i}</button>`;
+                    sendButtons += `<button class="send-card" data-card-id="${card.id}" data-target-player="${i}" data-target-deck="${deckName}_hand">--> Player ${i}</button>`;
                 };
             };              
         };

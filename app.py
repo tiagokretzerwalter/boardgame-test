@@ -14,7 +14,7 @@ socketio = SocketIO(app)
 
 original_utopia_deck = []
 original_acao_deck = []
-original_characters_deck = ["Gorda", "Trabalhadora", "Ninja", "Amiga", "Blogueira", "Envergonhada"]
+original_characters_deck = [{'name': "Gorda"}, {'name': "Trabalhadora"}, {'name': "Ninja"}, {'name': "Amiga"}, {'name': "Blogueira"}, {'name': "Envergonhada"}]
 
 import_deck('data/utopia_cards.csv', original_utopia_deck, 'Utopia')
 import_deck('data/acao_cards.csv', original_acao_deck, 'Ação')
@@ -116,7 +116,8 @@ def reset_game():
 @socketio.on('use_card')
 def use_card(data):
     player_id = f'Player {data["player_id"]}'
-    card = data['card']
+    card_id = data['card_id']
+    card = next(card for card in players[player_id]['utopia_hand'] if card['id'] == card_id)
     players[player_id]['utopia_hand'].remove(card)
     players[player_id]['board'].append(card)
     broadcast_game_state()
@@ -124,8 +125,9 @@ def use_card(data):
 @socketio.on('move_to_utopia')
 def move_to_utopia(data):
     player_id = f'Player {data["player_id"]}'
-    card = data['card']
+    card_id = data['card_id']
     target_deck = data['target_deck']
+    card = next(card for card in players[player_id]['board'] if card['id'] == card_id)
     players[player_id]['board'].remove(card)
     if target_deck == 'utopia_hand':
         players[player_id]['utopia_hand'].append(card)
@@ -137,38 +139,46 @@ def move_to_utopia(data):
 def send_card_to_player(data):
     player_id = f'Player {data["player_id"]}'
     target_player = f'Player {data["target_player"]}'
-    card = data['card']
+    card_id = data['card_id']
     target_deck = data['target_deck']
-    if card in players[player_id][target_deck]:
-        players[player_id][target_deck].remove(card)
-        players[target_player][target_deck].append(card)
+    card = next(card for card in players[player_id][target_deck] if card['id'] == card_id)
+    players[player_id][target_deck].remove(card)
+    players[target_player][target_deck].append(card)
     broadcast_game_state()
 
 @socketio.on('send_card_to_trash')
 def send_card_to_trash(data):
     player_id = f'Player {data["player_id"]}'
-    card = data['card']
-    if card in players[player_id]['utopia_hand']:
+    card_id = data['card_id']
+    card = next((card for card in players[player_id]['utopia_hand'] if card['id'] == card_id), None)
+    if card:
         players[player_id]['utopia_hand'].remove(card)
         utopia_trash_deck.append(card)
-    elif card in players[player_id]['acao_hand']:
-        players[player_id]['acao_hand'].remove(card)
-        acao_trash_deck.append(card)
-    elif card in players[player_id]['board']:
-        players[player_id]['board'].remove(card)
-        utopia_trash_deck.append(card)    
+    else:
+        card = next((card for card in players[player_id]['acao_hand'] if card['id'] == card_id), None)
+        if card:
+            players[player_id]['acao_hand'].remove(card)
+            acao_trash_deck.append(card)
+        else:
+            card = next((card for card in players[player_id]['board'] if card['id'] == card_id), None)
+            if card:
+                players[player_id]['board'].remove(card)
+                utopia_trash_deck.append(card)    
     broadcast_game_state()
 
 @socketio.on('send_card_from_trash')
 def send_card_from_trash(data):
     target_player = f'Player {data["target_player"]}'
-    card = data['card']
-    if card in acao_trash_deck:
+    card_id = data['card_id']
+    card = next((card for card in acao_trash_deck if card['id'] == card_id), None)
+    if card:
         acao_trash_deck.remove(card)
         players[target_player]['acao_hand'].append(card)
-    if card in utopia_trash_deck:
-        utopia_trash_deck.remove(card)
-        players[target_player]['utopia_hand'].append(card)
+    else:
+        card = next((card for card in utopia_trash_deck if card['id'] == card_id), None)
+        if card:
+            utopia_trash_deck.remove(card)
+            players[target_player]['utopia_hand'].append(card)
     broadcast_game_state()
 
 @socketio.on('reset_trash')
