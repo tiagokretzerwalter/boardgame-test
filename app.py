@@ -153,8 +153,11 @@ def send_card_to_player(data):
     target_player = f'Player {data["target_player"]}'
     card_id = data['card_id']
     target_deck = data['target_deck']
-    card = next(card for card in players[player_id][target_deck] if card['id'] == card_id)
-    players[player_id][target_deck].remove(card)
+    card = next(card for card in players[player_id]['board'] + players[player_id]['utopia_hand'] if card['id'] == card_id)
+    if card in players[player_id]['board']:
+        players[player_id]['board'].remove(card)
+    elif card in players[player_id]['utopia_hand']:
+        players[player_id]['utopia_hand'].remove(card)
     players[target_player][target_deck].append(card)
     broadcast_game_state()
 
