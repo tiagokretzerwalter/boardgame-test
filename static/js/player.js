@@ -61,6 +61,11 @@ $(document).ready(function() {
             var cardId = $(this).data('card-id');
             socket.emit('move_to_utopia', { player_id: player_id, card_id: cardId, target_deck: "utopia_deck" });
         });
+
+        $(document).on('click', '.send_to_acao_deck', function() {
+            var cardId = $(this).data('card-id');
+            socket.emit('send_to_acao_deck', { player_id: player_id, card_id: cardId });
+        });
     };    
 
     function updateHand(elementId, handData, handType) {
@@ -73,7 +78,8 @@ $(document).ready(function() {
             var trashButton = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? `<button class="send-to-trash" data-card-id="${card.id}">Lixo</button>` : '';
             var moveButtonToUtopiaHand = (handType === 'board') ? `<button class="move-to-utopia-hand" data-card-id="${card.id}">--> Mão Utopia</button>` : '';
             var sendToUtopiaDeck = (handType === 'utopia' || handType === 'board') ? `<button class="send_to_utopia_deck" data-card-id="${card.id}">--> Monte Utopia</button>` : '';
-            element.append(cardElement + useButton + sendButtons + trashButton + moveButtonToUtopiaHand + sendToUtopiaDeck);
+            var sendToAcaoDeck = (handType === 'acao') ? `<button class="send_to_acao_deck" data-card-id="${card.id}">--> Monte Acao</button>` : '';
+            element.append(cardElement + useButton + sendButtons + trashButton + moveButtonToUtopiaHand + sendToUtopiaDeck + sendToAcaoDeck);
         });
     };
 
@@ -108,16 +114,16 @@ $(document).ready(function() {
     function generateSendButtons(card, deckName) {
         var sendButtons = '';
         for (var i = 1; i <= 6; i++) {
-            if (deckName == "board") {
-                if (i !== player_id) {
-                    sendButtons += `<button class="send-card" data-card-id="${card.id}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
-                };
-            }
-            else {
+            if (deckName == "acao" || deckName == "utopia") {
                 if (i !== player_id) {
                     sendButtons += `<button class="send-card" data-card-id="${card.id}" data-target-player="${i}" data-target-deck="${deckName}_hand">--> Player ${i}</button>`;
                 };
-            };              
+            };
+            if (deckName == "board" || deckName == "utopia") {
+                if (i !== player_id) {
+                    sendButtons += `<button class="send-card" data-card-id="${card.id}" data-target-player="${i}" data-target-deck="board">--> Utopia Player ${i}</button>`;
+                };
+            };
         };
         return sendButtons;
     };

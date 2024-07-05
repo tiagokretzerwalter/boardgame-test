@@ -138,6 +138,15 @@ def move_to_utopia(data):
         utopia_deck.append(card)
     broadcast_game_state()
 
+@socketio.on('send_to_acao_deck')
+def send_to_acao_deck(data):
+    player_id = f'Player {data["player_id"]}'
+    card_id = data['card_id']
+    card = next(card for card in players[player_id]['acao_hand'] if card['id'] == card_id)
+    players[player_id]['acao_hand'].remove(card)
+    acao_deck.append(card)
+    broadcast_game_state()
+
 @socketio.on('send_card_to_player')
 def send_card_to_player(data):
     player_id = f'Player {data["player_id"]}'
