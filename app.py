@@ -127,8 +127,11 @@ def move_to_utopia(data):
     player_id = f'Player {data["player_id"]}'
     card_id = data['card_id']
     target_deck = data['target_deck']
-    card = next(card for card in players[player_id]['board'] if card['id'] == card_id)
-    players[player_id]['board'].remove(card)
+    card = next(card for card in players[player_id]['board'] + players[player_id]['utopia_hand'] if card['id'] == card_id)
+    if card in players[player_id]['board']:
+        players[player_id]['board'].remove(card)
+    elif card in players[player_id]['utopia_hand']:
+        players[player_id]['utopia_hand'].remove(card)
     if target_deck == 'utopia_hand':
         players[player_id]['utopia_hand'].append(card)
     elif target_deck == 'utopia_deck':

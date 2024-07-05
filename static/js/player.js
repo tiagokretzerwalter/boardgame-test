@@ -72,7 +72,7 @@ $(document).ready(function() {
             var sendButtons = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? generateSendButtons(card, handType) : '';
             var trashButton = (handType === 'utopia' || handType === 'acao' || handType === 'board') ? `<button class="send-to-trash" data-card-id="${card.id}">Lixo</button>` : '';
             var moveButtonToUtopiaHand = (handType === 'board') ? `<button class="move-to-utopia-hand" data-card-id="${card.id}">--> Mão Utopia</button>` : '';
-            var sendToUtopiaDeck = (handType === 'board') ? `<button class="send_to_utopia_deck" data-card-id="${card.id}">--> Monte Utopia</button>` : '';
+            var sendToUtopiaDeck = (handType === 'utopia' || handType === 'board') ? `<button class="send_to_utopia_deck" data-card-id="${card.id}">--> Monte Utopia</button>` : '';
             element.append(cardElement + useButton + sendButtons + trashButton + moveButtonToUtopiaHand + sendToUtopiaDeck);
         });
     };
